@@ -1,0 +1,43 @@
+# Python (backend)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv*/
+.env
+.env.*
+data/
+db/
+
+# VS Code
+.vscode/
+
+# Node.js (frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Misc
+*.swp
+*.swo
+
+# Ignore build outputs
+frontend/build/
+
+# Ignore coverage and test results
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+
+# Ignore package lock files (optional)
+frontend/package-lock.json
+frontend/yarn.lock

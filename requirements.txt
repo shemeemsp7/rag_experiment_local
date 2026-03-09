@@ -1,0 +1,9 @@
+langchain
+langchain-community
+qdrant-client
+pypdf
+ollama
+fastapi
+uvicorn
+python-multipart
+pytest
