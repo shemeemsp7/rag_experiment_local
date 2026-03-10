@@ -62,7 +62,7 @@ rag_experiment/
 
 Before running the project, install and configure the following:
 
-### 1. Python 3.9+
+### 1. Python 3.11
 
 Verify your Python version:
 ```bash
@@ -113,7 +113,7 @@ Qdrant runs on **http://localhost:6333** by default.
 
 ```bash
 # 1. Create and activate a Python virtual environment
-python -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate       # macOS/Linux
 # venv\Scripts\activate        # Windows
 
@@ -202,12 +202,12 @@ In addition to the web UI, two standalone command-line scripts are available:
 
 ### Ingest documents from the `data/` directory
 ```bash
-python ingest.py
+python3 ingest.py
 ```
 
 ### Interactive command-line chat
 ```bash
-python chat.py
+python3 chat.py
 ```
 
 ---
