@@ -7,9 +7,12 @@ A local **Retrieval-Augmented Generation (RAG)** system with a web-based UI. Upl
 ## Features
 
 - 📄 **Document Upload** — Upload PDF and TXT files via the web UI
-- 🔍 **Vector Ingestion** — Chunk documents, generate embeddings, and store them in Qdrant
-- 💬 **Conversational Q&A** — Ask questions about your documents and receive context-aware answers
-- 🤖 **Local LLM** — Powered by Ollama; no cloud API keys required
+- �️ **Per-Collection/Topic Organisation** — Assign each document to a named collection and optional topic at ingest time; collections are created on demand
+- 🔍 **Vector Ingestion** — Chunk documents, generate embeddings (768-dim), and store them in Qdrant with deterministic UUIDs so re-ingesting a file replaces only its own chunks
+- 📋 **Grouped Document List** — View documents grouped by **Collection**, **Topic**, or flat alphabetical order; groups are collapsible
+- 💬 **Filtered Chat** — Select a collection/topic in the chat panel to scope RAG retrieval to that collection only
+- 🤖 **Local LLM** — Powered by Ollama; no cloud API keys required; choose the model from the header dropdown
+- 🗑️ **Safe Delete** — Deleting a file removes only its vectors from the collection; the collection itself is deleted only when its last file is removed
 - 🔒 **Privacy-first** — All processing happens on your machine
 
 ---
@@ -35,9 +38,9 @@ rag_experiment/
 ├── ingest.py                 # Standalone document ingestion script
 ├── chat.py                   # Standalone command-line chat script
 ├── backend/
-│   ├── app.py                # FastAPI application (REST API server)
-│   ├── chat_service.py       # RAG chat logic
-│   ├── ingest_service.py     # Document chunking & embedding pipeline
+│   ├── app.py                # FastAPI application — all REST endpoints
+│   ├── chat_service.py       # RAG logic: embed query → Qdrant search → Ollama LLM
+│   ├── ingest_service.py     # Chunk, embed, upsert to named Qdrant collection
 │   ├── file_service.py       # File upload & listing utilities
 │   └── tests/
 │       ├── test_chat_service.py
@@ -45,14 +48,15 @@ rag_experiment/
 │       └── test_file_service.py
 ├── frontend/
 │   ├── package.json
-│   ├── vite.config.js        # Dev server (port 3000) & API proxy config
+│   ├── vite.config.js        # Dev server (port 3000) & API proxy → localhost:8000
 │   └── src/
-│       ├── App.jsx            # Root component with layout & model selector
-│       ├── api.js             # API client (maps to backend endpoints)
+│       ├── App.jsx            # Root component: state, model selector, layout
+│       ├── api.js             # All API client functions
+│       ├── index.css          # Global styles & design tokens
 │       └── components/
-│           ├── DocumentUpload.jsx   # File upload UI
-│           ├── DocumentList.jsx     # Document list, ingest & delete actions
-│           └── ChatInterface.jsx    # Chat UI with message history
+│           ├── DocumentUpload.jsx   # Upload + ingest with collection/topic fields
+│           ├── DocumentList.jsx     # Grouped/sorted document list with badges
+│           └── ChatInterface.jsx    # Chat UI with collection/topic filter dropdown
 └── data/                     # Uploaded documents (auto-created, git-ignored)
 ```
 
@@ -151,9 +155,11 @@ API calls from the frontend are automatically proxied to the backend at `http://
 
 1. **Open the web UI** at http://localhost:3000
 2. **Select an LLM model** from the dropdown in the header (fetched from Ollama)
-3. **Upload a document** using the upload panel (PDF or TXT files supported)
-4. **Ingest the document** by clicking the **Ingest** button next to the file — this chunks the document, generates embeddings, and stores them in Qdrant
-5. **Ask questions** in the Chat panel by selecting the document and typing your question
+3. **Upload a document** — in the upload panel, choose or create a **Collection** (logical group, e.g. `agriculture`) and optionally enter a **Topic** (e.g. `crop-diseases`), then pick your PDF/TXT file and click **Upload & Ingest**
+4. **Browse documents** in the left sidebar — use the **Group by** buttons to view files organised by Collection, Topic, or Name; click a group header to collapse/expand it
+5. **Filter chat by collection** — in the Chat panel, select a Collection or Topic from the dropdown; subsequent questions will only search within that collection
+6. **Ask questions** — type your question and press **Send**; the RAG pipeline retrieves the most relevant chunks from Qdrant and passes them as context to the LLM
+7. **Delete a document** — click **Delete** on any document; only that file's vectors are removed; the collection is automatically cleaned up if it becomes empty
 
 ---
 
@@ -163,10 +169,14 @@ API calls from the frontend are automatically proxied to the backend at `http://
 |--------|----------|-------------|
 | `GET` | `/` | Health check |
 | `POST` | `/upload` | Upload a document file |
-| `GET` | `/documents` | List all uploaded documents |
-| `POST` | `/ingest` | Ingest a document (chunk, embed, store) |
-| `POST` | `/chat` | Ask a question about a document |
-| `DELETE` | `/documents/{filename}` | Delete a document and its vectors |
+| `GET` | `/documents` | List filenames on disk |
+| `GET` | `/documents/info` | List documents with collection & topic metadata (from Qdrant) |
+| `POST` | `/ingest` | Ingest a document — accepts `filename`, `collection_name`, `topic` |
+| `POST` | `/chat` | RAG chat — accepts `question`, `model`, `collection_name`, `topic` |
+| `DELETE` | `/documents/{filename}` | Delete a file's vectors; accepts `?collection_name=`; drops the collection if empty |
+| `GET` | `/collections` | List all Qdrant collections |
+| `GET` | `/collection/{name}` | Get details of a specific collection |
+| `POST` | `/search` | Vector search within a collection with optional metadata filters |
 | `GET` | `/llm-models` | List available Ollama models |
 
 Full interactive documentation is available at **http://localhost:8000/docs** when the backend is running.
