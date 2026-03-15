@@ -1,5 +1,5 @@
 """
-Ingest documents, generate embeddings using llama3.1:8b via Ollama, and store in Qdrant.
+Ingest documents, generate embeddings using nomic-embed-text, llama3.1:8b via Ollama, and store in Qdrant.
 """
 import os
 from qdrant_client import QdrantClient, models
