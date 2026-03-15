@@ -135,6 +135,3 @@ Current approach in this repository is:
 
 If needed in future, hybrid retrieval can be added for stronger exact-term behavior while preserving semantic recall.
 
-## Note About Code Comments
-
-One comment/docstring in `ingest.py` mentions llama3.1:8b for embeddings, but the actual embedding calls use `nomic-embed-text`. The implementation is correct for semantic embedding; that wording is just stale documentation text.
