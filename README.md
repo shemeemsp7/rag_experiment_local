@@ -4,6 +4,11 @@ A local **Retrieval-Augmented Generation (RAG)** system with a web-based UI. Upl
 
 ---
 
+
+## UI Screenshot
+
+![UI Screenshot](screenshots/ui_screenshot.png)
+
 ## Features
 
 - 📄 **Document Upload** — Upload PDF and TXT files via the web UI
